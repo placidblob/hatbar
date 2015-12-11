@@ -36,15 +36,26 @@ class HatBar(object):
     # logic
 
     def draw(self, value):
+        """
+        Renders the bar.
+        """
+
+        # set the value (this adjusts minmax)
         self.curr = value
 
         if min == max:
+            # not enough input yet
             self.show_init()
         else:
+            # loop through the bars and draw each one
             for i in range(0, self.length):
                 self.draw_pixel(i)
 
     def draw_pixel(self, i):
+        """
+        Draws a single led (pixel)
+        :param i: led number. shoud ensure that  i < length
+        """
         if self.should_be_on(i):
             # ON
             self.sense.set_pixel(i, self.row, self.foreground)
@@ -53,7 +64,10 @@ class HatBar(object):
             self.sense.set_pixel(i, self.row, self.background)
 
     def show_init(self):
-        # set init colour
+        # no input values, or all inputt is the same:
+        # set "init colour"
+        # !!! seeing init_colour most probably means that
+        #     there is a problem with the input
         for i in range(0, self.length):
             self.sense.set_pixel(i, self.row, self.initcolour)
 
@@ -61,19 +75,59 @@ class HatBar(object):
     # arithmetics
 
     def should_be_on(self, pixel):
-        # on if "pixel%" is below value
-        # TODO abs here somehow
-        return self.pixel2val(pixel) <= self.curr - self.min
+        """
+        Determines if given pixel should be on
+
+        :param pixel: starts with 0
+        :return:
+        """
+
+        # convert LED no to percentage
+        pixelval = self.pixel2val(pixel)
+
+        # on if "pixel%" is below relative value
+
+        return pixelval <= self.curr_in_range()
+
+    def curr_in_range(self):
+        """
+        :return: what self.curr would be if self.min was 0
+        """
+
+        # TODO implement logarithmic/exponential (inertial?) here
+
+        # offset for min
+        return self.curr - self.min
 
     def adjust_minmax(self):
+        """
+        Checks current value, and adjusts historic min/max
+        This is called by the default setter of self.curr
+        """
+
+        # TODO implement short memory here
+
+        # if  uninitialised or if current value is LOWER than historic MIN:
+        #   adjust historic MIN
         if (self.min is False) or (self.curr < self.min):
             self.min = float(self.curr)
+
+        # check for False, i.e. not received a value yet
+        # also, if our current value is HIGHER than historic MAX:
+        #   adjust historic MAX
         if (self.max is False) or (self.curr > self.max):
             self.max = float(self.curr)
 
     def pixel2val(self, pixel):
-        # if (self.max is False) or (self.min is False):
-        #     return False
+        """
+        Converts a pixel to a value.
+        Used to calculate for example:
+            - on an 8-pixel bar
+            - pixel=1 is 12.5%
+            - pixel=2 is 25%
+        :param pixel: starts with 0
+        :return:
+        """
 
         range = self.max - self.min
 
