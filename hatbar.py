@@ -66,8 +66,8 @@ class HatBar(object):
     def show_init(self):
         # no input values, or all inputt is the same:
         # set "init colour"
-        # !!! seeing init_colour most probably means that
-        #     there is a problem with the input
+        # !!! seeing init_colour *probably* means that there's some problem with the input !!!
+        #     there is a problem with t
         for i in range(0, self.length):
             self.sense.set_pixel(i, self.row, self.initcolour)
 
@@ -79,14 +79,13 @@ class HatBar(object):
         Determines if given pixel should be on
 
         :param pixel: starts with 0
-        :return:
+        :return: True if the passed pixel should be on
         """
 
         # convert LED no to percentage
         pixelval = self.pixel2val(pixel)
 
-        # on if "pixel%" is below relative value
-
+        # True if the current percentage is above the percentage that this pixel represents
         return pixelval <= self.curr_in_range()
 
     def curr_in_range(self):
